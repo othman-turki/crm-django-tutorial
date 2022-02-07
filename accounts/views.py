@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.forms import inlineformset_factory
 
 from .models import Customer, Order, Product
 from .forms import OrderForm
@@ -60,21 +60,29 @@ def customer(request, pk):
     )
 
 
-def order_create(request):
+def order_create(request, pk):
     """Create Order View"""
 
-    form = OrderForm()
+    OrderFormSet = inlineformset_factory(
+        Customer, Order, fields=("product", "status"), extra=6
+    )
+
+    customer = Customer.objects.get(id=pk)
 
     if request.method == "POST":
-        form = OrderForm(request.POST)
+        # form = OrderForm(request.POST)
+        formset = OrderFormSet(request.POST, instance=customer)
 
-        if form.is_valid():
-            form.save()
+        if formset.is_valid():
+            formset.save()
 
             return redirect("accounts:home")
 
+    # form = OrderForm(initial={"customer": customer})
+    formset = OrderFormSet(queryset=Order.objects.none(), instance=customer)
+
     context = {
-        "form": form,
+        "formset": formset,
     }
 
     return render(
@@ -87,15 +95,15 @@ def order_update(request, pk):
 
     order = Order.objects.get(id=pk)
 
-    form = OrderForm(instance=order)
-
     if request.method == "POST":
         form = OrderForm(request.POST, instance=order)
 
         if form.is_valid():
             form.save()
 
-            return redirect(reverse("accounts:home"))
+            return redirect("accounts:home")
+
+    form = OrderForm(instance=order)
 
     context = {
         "form": form,
@@ -114,7 +122,7 @@ def order_delete(request, pk):
     if request.method == "POST":
         order.delete()
 
-        return redirect(reverse("accounts:home"))
+        return redirect("accounts:home")
 
     context = {"order": order}
 
