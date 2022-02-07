@@ -1,9 +1,9 @@
-from operator import mod
-from statistics import mode
 from django.db import models
 
 
 class Customer(models.Model):
+    """Customer Model"""
+
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
@@ -14,6 +14,8 @@ class Customer(models.Model):
 
 
 class Tag(models.Model):
+    """Tag Model"""
+
     name = models.CharField(max_length=255)
 
     def __str__(self):
@@ -21,6 +23,8 @@ class Tag(models.Model):
 
 
 class Product(models.Model):
+    """Product Model"""
+
     CATEGORY = (
         ("Indoor", "Indoor"),
         ("Out Door", "Out Door"),
@@ -38,6 +42,8 @@ class Product(models.Model):
 
 
 class Order(models.Model):
+    """Order Model"""
+
     STATUS = (
         ("Pending", "Pending"),
         ("Out for delivery", "Out for delivery"),
@@ -48,3 +54,6 @@ class Order(models.Model):
     product = models.ForeignKey(Product, null=True, on_delete=models.SET_NULL)
     date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=200, choices=STATUS)
+
+    def __str__(self):
+        return f"{self.product}"
